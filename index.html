@@ -7,7 +7,7 @@
   <title>Control de cuotas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -32,6 +32,7 @@
       <header class="appbar">
         <div class="logo" id="logo" aria-hidden="true"></div>
         <div class="titles">
+          <span class="kicker">Libro de cuotas</span>
           <h1 id="title">Cuotas</h1>
           <p id="mode"></p>
         </div>
@@ -52,23 +53,23 @@
           <button class="round" type="button" id="next-month" aria-label="Mes siguiente">›</button>
         </div>
 
-        <div class="stats">
-          <div class="stat hero">
-            <span class="stat-label">Cobrado</span>
+        <div class="summary">
+          <div class="figure">
+            <span class="label">Cobrado</span>
             <strong id="st-paid"></strong>
-            <div class="progress" role="progressbar" aria-label="Socios al día" aria-valuemin="0" aria-valuemax="100">
-              <span id="st-bar"></span>
-            </div>
-            <span class="stat-foot"><span id="st-count"></span> socios al día · <span id="st-pct"></span></span>
+            <span class="note"><span id="st-count"></span> socios al día · <span id="st-pct"></span></span>
           </div>
-          <div class="stat due">
-            <span class="stat-label">Falta cobrar</span>
+          <div class="figure due">
+            <span class="label">Falta cobrar</span>
             <strong id="st-due"></strong>
-            <span class="stat-foot" id="st-late"></span>
+            <span class="note" id="st-late"></span>
+          </div>
+          <div class="bar" role="progressbar" aria-label="Socios al día" aria-valuemin="0" aria-valuemax="100">
+            <span id="st-bar"></span>
           </div>
         </div>
 
-        <section class="card">
+        <section class="card ledger">
           <div class="filters">
             <div class="search">
               <input id="search" type="search" placeholder="Buscar socio…" aria-label="Buscar socio">
@@ -79,6 +80,9 @@
               <button class="chip" type="button" data-filter="paid" aria-pressed="false">Pagaron</button>
             </div>
           </div>
+          <div class="row head" aria-hidden="true">
+            <span>Socio</span><span>Plan</span><span class="num">Cuota</span><span>Estado</span><span></span>
+          </div>
           <div id="month-list"></div>
           <div class="toolbar" style="margin:16px 0 0">
             <span></span>
@@ -88,10 +92,13 @@
       </div>
 
       <!-- Socios -->
-      <section id="tab-members" class="card" hidden>
+      <section id="tab-members" class="card ledger" hidden>
         <div class="toolbar">
           <h2 style="margin:0">Socios</h2>
           <button class="btn sm" type="button" id="new-member">+ Nuevo socio</button>
+        </div>
+        <div class="row head" aria-hidden="true">
+          <span>Socio</span><span>Plan</span><span class="num">Cuota</span><span>Estado</span><span></span>
         </div>
         <div id="members-list"></div>
       </section>

@@ -29,13 +29,6 @@
     return ((parts[0] || "")[0] || "").concat((parts[1] || "")[0] || "").toUpperCase() || "?";
   }
 
-  // Círculo con iniciales y un color fijo por persona.
-  function avatar(name) {
-    let h = 0;
-    for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) % 360;
-    return el("span", { class: "avatar", style: "--h:" + h, "aria-hidden": "true" }, initials(name));
-  }
-
   const planOf = (m) => state.settings.plans.find((p) => p.id === m.planId);
   const planName = (m) => (planOf(m) || { name: "Sin plan" }).name;
   const priceOf = (m) => Number((planOf(m) || {}).price) || 0;
@@ -138,19 +131,20 @@
 
     box.replaceChildren(...visible.map((r) => {
       const m = r.member;
-      const badgeText = r.status === "paid"
-        ? "Pagó " + shortDate(r.pay.paidOn) + " · " + r.pay.method
-        : r.status === "late" ? "Vencida" : "Vence " + shortDate(r.due);
-      return el("div", { class: "booking" },
-        avatar(m.name),
+      const status = r.status === "paid"
+        ? [el("span", { class: "stamp" }, "Pagado"),
+          el("span", { class: "note" }, shortDate(r.pay.paidOn) + " · " + r.pay.method)]
+        : r.status === "late"
+          ? [el("span", { class: "late" }, "Vencida"), el("span", { class: "note" }, "el " + shortDate(r.due))]
+          : el("span", { class: "note" }, "Vence el " + shortDate(r.due));
+      return el("div", { class: "row " + r.status },
         el("div", { class: "who" },
           el("strong", {}, m.name),
-          el("div", { class: "meta" }, planName(m) + (m.phone ? " · " + m.phone : ""))
+          m.phone && el("span", { class: "note" }, m.phone)
         ),
-        el("div", { class: "amount-col" },
-          el("strong", {}, U.money(r.amount) || "$0"),
-          el("span", { class: "badge " + r.status }, badgeText)
-        ),
+        el("span", { class: "plan" }, planName(m)),
+        el("span", { class: "num" }, U.money(r.amount) || "$0"),
+        el("div", { class: "status" }, status),
         el("div", { class: "acts" },
           r.status === "paid"
             ? el("button", {
@@ -255,14 +249,17 @@
     }
     const list = [...state.members].sort((a, b) =>
       (a.active === false) - (b.active === false) || a.name.localeCompare(b.name, "es"));
-    box.replaceChildren(...list.map((m) => el("div", { class: "booking members" + (m.active === false ? " inactive" : "") },
-      avatar(m.name),
+    box.replaceChildren(...list.map((m) => el("div", { class: "row" + (m.active === false ? " inactive" : "") },
       el("div", { class: "who" },
-        el("strong", {}, m.name, m.active === false && el("span", { class: "badge pending", style: "margin-left:8px" }, "De baja")),
-        el("div", { class: "meta" },
-          [planName(m) + " · " + U.money(priceOf(m)), m.phone, m.since && "desde " + shortDate(m.since)].filter(Boolean).join(" · ")),
-        m.notes && el("div", { class: "meta" }, m.notes)
+        el("strong", {}, m.name),
+        el("span", { class: "note" }, [m.phone, m.notes].filter(Boolean).join(" · "))
       ),
+      el("span", { class: "plan" }, planName(m)),
+      el("span", { class: "num" }, U.money(priceOf(m))),
+      el("div", { class: "status" },
+        m.active === false
+          ? el("span", { class: "late" }, "De baja")
+          : el("span", { class: "note" }, m.since ? "Desde " + shortDate(m.since) : "")),
       el("div", { class: "acts" },
         el("button", { class: "btn ghost sm", type: "button", onclick: () => openMember(m) }, "Editar"),
         el("button", {
