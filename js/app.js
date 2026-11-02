@@ -110,7 +110,7 @@
     $("#st-late").textContent = [
       late && late + (late === 1 ? " vencida" : " vencidas"),
       pending && pending + (pending === 1 ? " pendiente" : " pendientes")
-    ].filter(Boolean).join(" · ") || "¡Todos al día!";
+    ].filter(Boolean).join(" · ") || (rows.length ? "¡Todos al día!" : "");
 
     const q = state.query.toLowerCase();
     const visible = rows
