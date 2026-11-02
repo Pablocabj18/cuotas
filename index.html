@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Control de cuotas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -26,13 +29,14 @@
     </section>
 
     <div id="app" hidden>
-      <div class="toolbar">
-        <div>
-          <h1 style="margin:0;font-size:1.5rem" id="title">Cuotas</h1>
-          <span class="muted small" id="mode"></span>
+      <header class="appbar">
+        <div class="logo" id="logo" aria-hidden="true"></div>
+        <div class="titles">
+          <h1 id="title">Cuotas</h1>
+          <p id="mode"></p>
         </div>
         <button class="btn ghost sm" id="logout" type="button" hidden>Salir</button>
-      </div>
+      </header>
 
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" aria-selected="true" data-tab="month">Cuotas del mes</button>
@@ -42,21 +46,33 @@
 
       <!-- Cuotas del mes -->
       <div id="tab-month">
-        <div class="cal-head card" style="padding:10px 12px">
-          <button class="btn ghost sm" type="button" id="prev-month" aria-label="Mes anterior">‹</button>
+        <div class="monthbar">
+          <button class="round" type="button" id="prev-month" aria-label="Mes anterior">‹</button>
           <strong id="month-label" aria-live="polite"></strong>
-          <button class="btn ghost sm" type="button" id="next-month" aria-label="Mes siguiente">›</button>
+          <button class="round" type="button" id="next-month" aria-label="Mes siguiente">›</button>
         </div>
 
         <div class="stats">
-          <div class="stat"><span class="muted small">Cobrado</span><strong id="st-paid"></strong></div>
-          <div class="stat"><span class="muted small">Falta cobrar</span><strong id="st-due"></strong></div>
-          <div class="stat"><span class="muted small">Al día</span><strong id="st-count"></strong></div>
+          <div class="stat hero">
+            <span class="stat-label">Cobrado</span>
+            <strong id="st-paid"></strong>
+            <div class="progress" role="progressbar" aria-label="Socios al día" aria-valuemin="0" aria-valuemax="100">
+              <span id="st-bar"></span>
+            </div>
+            <span class="stat-foot"><span id="st-count"></span> socios al día · <span id="st-pct"></span></span>
+          </div>
+          <div class="stat due">
+            <span class="stat-label">Falta cobrar</span>
+            <strong id="st-due"></strong>
+            <span class="stat-foot" id="st-late"></span>
+          </div>
         </div>
 
         <section class="card">
           <div class="filters">
-            <input id="search" type="search" placeholder="Buscar socio…" aria-label="Buscar socio">
+            <div class="search">
+              <input id="search" type="search" placeholder="Buscar socio…" aria-label="Buscar socio">
+            </div>
             <div class="chips" role="group" aria-label="Filtrar">
               <button class="chip" type="button" data-filter="all" aria-pressed="true">Todos</button>
               <button class="chip" type="button" data-filter="due" aria-pressed="false">Deben</button>

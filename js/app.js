@@ -24,6 +24,18 @@
     return Number(d) + "/" + Number(m) + (y !== String(new Date().getFullYear()) ? "/" + y : "");
   }
 
+  function initials(name) {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    return ((parts[0] || "")[0] || "").concat((parts[1] || "")[0] || "").toUpperCase() || "?";
+  }
+
+  // Círculo con iniciales y un color fijo por persona.
+  function avatar(name) {
+    let h = 0;
+    for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) % 360;
+    return el("span", { class: "avatar", style: "--h:" + h, "aria-hidden": "true" }, initials(name));
+  }
+
   const planOf = (m) => state.settings.plans.find((p) => p.id === m.planId);
   const planName = (m) => (planOf(m) || { name: "Sin plan" }).name;
   const priceOf = (m) => Number((planOf(m) || {}).price) || 0;
@@ -93,9 +105,19 @@
     $("#month-label").textContent = U.monthLabel(state.month.getFullYear(), state.month.getMonth());
     const rows = monthRows();
     const paid = rows.filter((r) => r.status === "paid");
+    const late = rows.filter((r) => r.status === "late").length;
+    const pending = rows.filter((r) => r.status === "pending").length;
+    const pct = rows.length ? Math.round((paid.length / rows.length) * 100) : 0;
     $("#st-paid").textContent = U.money(paid.reduce((n, r) => n + r.amount, 0)) || "$0";
     $("#st-due").textContent = U.money(rows.filter((r) => r.status !== "paid").reduce((n, r) => n + r.amount, 0)) || "$0";
     $("#st-count").textContent = paid.length + " de " + rows.length;
+    $("#st-pct").textContent = pct + "%";
+    $("#st-bar").style.width = pct + "%";
+    $("#st-bar").parentElement.setAttribute("aria-valuenow", String(pct));
+    $("#st-late").textContent = [
+      late && late + (late === 1 ? " vencida" : " vencidas"),
+      pending && pending + (pending === 1 ? " pendiente" : " pendientes")
+    ].filter(Boolean).join(" · ") || "¡Todos al día!";
 
     const q = state.query.toLowerCase();
     const visible = rows
@@ -120,6 +142,7 @@
         ? "Pagó " + shortDate(r.pay.paidOn) + " · " + r.pay.method
         : r.status === "late" ? "Vencida" : "Vence " + shortDate(r.due);
       return el("div", { class: "booking" },
+        avatar(m.name),
         el("div", { class: "who" },
           el("strong", {}, m.name),
           el("div", { class: "meta" }, planName(m) + (m.phone ? " · " + m.phone : ""))
@@ -232,7 +255,8 @@
     }
     const list = [...state.members].sort((a, b) =>
       (a.active === false) - (b.active === false) || a.name.localeCompare(b.name, "es"));
-    box.replaceChildren(...list.map((m) => el("div", { class: "booking" + (m.active === false ? " inactive" : "") },
+    box.replaceChildren(...list.map((m) => el("div", { class: "booking members" + (m.active === false ? " inactive" : "") },
+      avatar(m.name),
       el("div", { class: "who" },
         el("strong", {}, m.name, m.active === false && el("span", { class: "badge pending", style: "margin-left:8px" }, "De baja")),
         el("div", { class: "meta" },
@@ -364,6 +388,7 @@
       await S.saveSettings(next);
       state.settings = next;
       $("#title").textContent = next.businessName;
+      $("#logo").textContent = initials(next.businessName);
       renderMonth();
       renderMembers();
       toast("Cambios guardados");
@@ -381,6 +406,7 @@
     $("#mode").textContent = S.isRemote ? "Conectado a la base de datos" : "Modo demo · datos guardados en este navegador";
     state.settings = await S.getSettings();
     $("#title").textContent = state.settings.businessName;
+    $("#logo").textContent = initials(state.settings.businessName);
     document.title = "Cuotas · " + state.settings.businessName;
     const today = new Date();
     state.month = new Date(today.getFullYear(), today.getMonth(), 1);
