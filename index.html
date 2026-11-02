@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Control de cuotas</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <section id="login" class="card" hidden>
+      <h2>Ingresar</h2>
+      <form id="login-form">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn block" type="submit">Entrar</button>
+        <p id="login-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <div id="app" hidden>
+      <div class="toolbar">
+        <div>
+          <h1 style="margin:0;font-size:1.5rem" id="title">Cuotas</h1>
+          <span class="muted small" id="mode"></span>
+        </div>
+        <button class="btn ghost sm" id="logout" type="button" hidden>Salir</button>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-tab="month">Cuotas del mes</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="members">Socios</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="settings">Configuración</button>
+      </div>
+
+      <!-- Cuotas del mes -->
+      <div id="tab-month">
+        <div class="cal-head card" style="padding:10px 12px">
+          <button class="btn ghost sm" type="button" id="prev-month" aria-label="Mes anterior">‹</button>
+          <strong id="month-label" aria-live="polite"></strong>
+          <button class="btn ghost sm" type="button" id="next-month" aria-label="Mes siguiente">›</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span class="muted small">Cobrado</span><strong id="st-paid"></strong></div>
+          <div class="stat"><span class="muted small">Falta cobrar</span><strong id="st-due"></strong></div>
+          <div class="stat"><span class="muted small">Al día</span><strong id="st-count"></strong></div>
+        </div>
+
+        <section class="card">
+          <div class="filters">
+            <input id="search" type="search" placeholder="Buscar socio…" aria-label="Buscar socio">
+            <div class="chips" role="group" aria-label="Filtrar">
+              <button class="chip" type="button" data-filter="all" aria-pressed="true">Todos</button>
+              <button class="chip" type="button" data-filter="due" aria-pressed="false">Deben</button>
+              <button class="chip" type="button" data-filter="paid" aria-pressed="false">Pagaron</button>
+            </div>
+          </div>
+          <div id="month-list"></div>
+          <div class="toolbar" style="margin:16px 0 0">
+            <span></span>
+            <button class="btn ghost sm" type="button" id="export">Descargar planilla (CSV)</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Socios -->
+      <section id="tab-members" class="card" hidden>
+        <div class="toolbar">
+          <h2 style="margin:0">Socios</h2>
+          <button class="btn sm" type="button" id="new-member">+ Nuevo socio</button>
+        </div>
+        <div id="members-list"></div>
+      </section>
+
+      <!-- Configuración -->
+      <form id="tab-settings" hidden>
+        <section class="card">
+          <h2>Tu negocio</h2>
+          <div class="grid-2">
+            <div class="field">
+              <label for="s-name">Nombre</label>
+              <input id="s-name" type="text" maxlength="60" required>
+            </div>
+            <div class="field">
+              <label for="s-due">La cuota vence el día</label>
+              <input id="s-due" type="number" min="1" max="28">
+            </div>
+            <div class="field">
+              <label for="s-alias">Alias o CBU para transferir (opcional)</label>
+              <input id="s-alias" type="text" maxlength="40">
+            </div>
+            <div class="field">
+              <label for="s-cc">Código de país para WhatsApp</label>
+              <input id="s-cc" type="text" placeholder="549 = Argentina" maxlength="5">
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Planes</h2>
+          <div class="plan-row muted small" aria-hidden="true"><span>Nombre</span><span>Precio por mes</span><span></span></div>
+          <div id="plans-edit"></div>
+          <button class="btn ghost sm" type="button" id="add-plan">+ Agregar plan</button>
+        </section>
+
+        <button class="btn block" type="submit" id="save">Guardar cambios</button>
+        <p id="save-error" class="error" hidden></p>
+      </form>
+    </div>
+  </main>
+
+  <!-- Registrar pago -->
+  <dialog id="pay-dialog">
+    <form id="pay-form" method="dialog">
+      <h2 id="pay-title">Registrar pago</h2>
+      <div class="field">
+        <label for="p-amount">Monto</label>
+        <input id="p-amount" type="number" min="0" required>
+      </div>
+      <div class="field">
+        <label for="p-method">Medio de pago</label>
+        <select id="p-method">
+          <option>Efectivo</option>
+          <option>Transferencia</option>
+          <option>Mercado Pago</option>
+          <option>Tarjeta</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="p-date">Fecha</label>
+        <input id="p-date" type="date" required>
+      </div>
+      <p id="pay-error" class="error" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn ghost" type="button" data-close>Cancelar</button>
+        <button class="btn" type="submit">Guardar pago</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Socio -->
+  <dialog id="member-dialog">
+    <form id="member-form" method="dialog">
+      <h2 id="member-title">Nuevo socio</h2>
+      <div class="field">
+        <label for="m-name">Nombre y apellido</label>
+        <input id="m-name" type="text" maxlength="80" required>
+      </div>
+      <div class="field">
+        <label for="m-phone">WhatsApp</label>
+        <input id="m-phone" type="tel" maxlength="30" placeholder="Ej: 11 2233 4455">
+      </div>
+      <div class="field">
+        <label for="m-plan">Plan</label>
+        <select id="m-plan"></select>
+      </div>
+      <div class="field">
+        <label for="m-since">Socio desde</label>
+        <input id="m-since" type="date" required>
+      </div>
+      <div class="field">
+        <label for="m-notes">Notas (opcional)</label>
+        <input id="m-notes" type="text" maxlength="200">
+      </div>
+      <p id="member-error" class="error" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn ghost" type="button" data-close>Cancelar</button>
+        <button class="btn" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
